@@ -31,6 +31,7 @@
   String $short_time_format, 
   String $datetime_format,
   String $short_datetime_format,
+  Boolean $remote_auth_enabled,
   String $remote_auth_backend,
   String $remote_auth_header,
   String $remote_auth_first_name,
