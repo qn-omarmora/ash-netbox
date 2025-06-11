@@ -17,6 +17,9 @@
 #   Array of valid fully-qualified domain names (FQDNs) for the NetBox server. NetBox will not permit write
 #   access to the server via any other hostnames. The first FQDN in the list will be treated as the preferred name.
 #
+# @param allow_token_retrieval
+#   Permit the retrieval of API tokens after their creation.
+#
 # @param database_name
 #   Name of the PostgreSQL database. If handle_database is true, then this database
 #   gets created as well. If not, then it is only used by the application, and needs to exist.
@@ -132,6 +135,36 @@
 # Date/time formatting. See the following link for supported formats:
 # https://docs.djangoproject.com/en/stable/ref/templates/builtins/#date
 #
+# @param remote_auth_enabled
+# boolean that enables the remote authentication for netbox.
+# This must be set to True in order for remote_auth_* settings to take effect.
+#
+# @param remote_auth_backend
+#   This is the Python path to the custom Django authentication backend to use for external
+#   user authentication. NetBox provides two built-in backends (listed below), though custom
+#   authentication backends may also be provided by other packages or plugins. Provide a string
+#   for a single backend, or an iterable for multiple backends, which will be attempted in the order given.
+#
+# @param remote_auth_header
+#   When remote user authentication is in use, this is the name of the HTTP header which informs
+#   NetBox of the currently authenticated user. For example, to use the request header X-Remote-User
+#   it needs to be set to HTTP_X_REMOTE_USER
+# 
+# @param remote_auth_first_name
+#   When remote user authentication is in use, this is the name of the HTTP header which informs
+#   NetBox of the first name of the currently authenticated user. For example, to use the request
+#   header X-Remote-User-First-Name it needs to be set to HTTP_X_REMOTE_USER_FIRST_NAME.
+#
+# @param remote_auth_last_name
+#   When remote user authentication is in use, this is the name of the HTTP header which informs
+#   NetBox of the last name of the currently authenticated user. For example, to use the request
+#   header X-Remote-User-Last-Name it needs to be set to HTTP_X_REMOTE_USER_LAST_NAME.
+# 
+# @param remote_auth_user_email
+#   When remote user authentication is in use, this is the name of the HTTP header which informs
+#   NetBox of the email address of the currently authenticated user. For example, to use the request
+#   header X-Remote-User-Email it needs to be set to HTTP_X_REMOTE_USER_EMAIL.
+#
 # @example
 #   include netbox::config
 class netbox::config (
@@ -139,6 +172,7 @@ class netbox::config (
   String $group,
   Stdlib::Absolutepath $install_root,
   Array[Stdlib::Host] $allowed_hosts,
+  Boolean $allow_api_token_retrieval,
   String $database_name,
   String $database_user,
   String $database_password,
@@ -169,6 +203,12 @@ class netbox::config (
   String $short_time_format,
   String $datetime_format,
   String $short_datetime_format,
+  Boolean $remote_auth_enabled,
+  String $remote_auth_backend,
+  String $remote_auth_header,
+  String $remote_auth_first_name,
+  String $remote_auth_last_name,
+  String $remote_auth_user_email,
 ) {
   $should_create_superuser = false;
   $software_directory = "${install_root}/netbox"
@@ -195,37 +235,44 @@ class netbox::config (
 
   file { $config_file:
     content      => epp('netbox/configuration.py.epp', {
-      'allowed_hosts'           => $allowed_hosts,
-      'database_name'           => $database_name,
-      'database_user'           => $database_user,
-      'database_password'       => $database_password,
-      'database_host'           => $database_host,
-      'database_port'           => $database_port,
-      'database_conn_max_age'   => $database_conn_max_age,
-      'redis_options'           => $redis_options,
-      'email_options'           => $email_options,
-      'secret_key'              => $secret_key,
-      'admins'                  => $admins,
-      'banner_top'              => $banner_top,
-      'banner_bottom'           => $banner_bottom,
-      'banner_login'            => $banner_login,
-      'base_path'               => $base_path,
-      'debug'                   => $debug,
-      'enforce_global_unique'   => $enforce_global_unique,
-      'exempt_view_permissions' => $exempt_view_permissions,
-      'login_required'          => $login_required,
-      'metrics_enabled'         => $metrics_enabled,
-      'prefer_ipv4'             => $prefer_ipv4,
-      'napalm_username'         => $napalm_username,
-      'napalm_password'         => $napalm_password,
-      'napalm_timeout'          => $napalm_timeout,
-      'time_zone'               => $time_zone,
-      'date_format'             => $date_format,
-      'short_date_format'       => $short_date_format,
-      'time_format'             => $time_format,
-      'short_time_format'       => $short_time_format,
-      'datetime_format'         => $datetime_format,
-      'short_datetime_format'   => $short_datetime_format,
+      'allowed_hosts'             => $allowed_hosts,
+      'allow_api_token_retrieval' => $allow_api_token_retrieval,
+      'database_name'             => $database_name,
+      'database_user'             => $database_user,
+      'database_password'         => $database_password,
+      'database_host'             => $database_host,
+      'database_port'             => $database_port,
+      'database_conn_max_age'     => $database_conn_max_age,
+      'redis_options'             => $redis_options,
+      'email_options'             => $email_options,
+      'secret_key'                => $secret_key,
+      'admins'                    => $admins,
+      'banner_top'                => $banner_top,
+      'banner_bottom'             => $banner_bottom,
+      'banner_login'              => $banner_login,
+      'base_path'                 => $base_path,
+      'debug'                     => $debug,
+      'enforce_global_unique'     => $enforce_global_unique,
+      'exempt_view_permissions'   => $exempt_view_permissions,
+      'login_required'            => $login_required,
+      'metrics_enabled'           => $metrics_enabled,
+      'prefer_ipv4'               => $prefer_ipv4,
+      'napalm_username'           => $napalm_username,
+      'napalm_password'           => $napalm_password,
+      'napalm_timeout'            => $napalm_timeout,
+      'time_zone'                 => $time_zone,
+      'date_format'               => $date_format,
+      'short_date_format'         => $short_date_format,
+      'time_format'               => $time_format,
+      'short_time_format'         => $short_time_format,
+      'datetime_format'           => $datetime_format,
+      'short_datetime_format'     => $short_datetime_format,
+      'remote_auth_enabled'       => $remote_auth_enabled,
+      'remote_auth_backend'       => $remote_auth_backend,
+      'remote_auth_header'        => $remote_auth_header,
+      'remote_auth_first_name'    => $remote_auth_first_name,
+      'remote_auth_last_name'     => $remote_auth_last_name,
+      'remote_auth_user_email'    => $remote_auth_user_email,
     }),
     owner        => $user,
     group        => $group,
