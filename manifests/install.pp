@@ -79,6 +79,40 @@ class netbox::install (
   Enum['tarball', 'git_clone'] $install_method = 'tarball',
 ) {
 
+    case $facts['os']['family'] {
+    'Redhat': {
+      $packages = [
+        gcc,
+        python36,
+        python36-devel,
+        libxml2-devel,
+        libxslt-devel,
+        libffi-devel,
+        openssl-devel,
+        redhat-rpm-config
+      ]
+    }
+    /^(Debian|Ubuntu)$/:{
+      $packages = [
+        python3,
+        python3-pip,
+        python3-venv,
+        python3-dev,
+        build-essential,
+        libxm12-dev,
+        libxslt1-dev,
+        libffi-dev,
+        libpq-dev,
+        libssl-dev,
+        zlib1g-dev
+      ]
+    }
+    default: {
+      fail('Unknown OS family.')
+      }
+    }
+
+  }
   $packages =[
     gcc,
     python36,
