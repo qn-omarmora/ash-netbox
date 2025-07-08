@@ -112,8 +112,6 @@ class netbox::install (
       }
     }
 
-  }
-
   $local_tarball = "${download_tmp_dir}/netbox-${version}.tar.gz"
   $software_directory_with_version = "${install_root}/netbox-${version}"
   $software_directory = "${install_root}/netbox"
