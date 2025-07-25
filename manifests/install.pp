@@ -99,7 +99,7 @@ class netbox::install (
         python3-venv,
         python3-dev,
         build-essential,
-        libxm12-dev,
+        libxml2-dev,
         libxslt1-dev,
         libffi-dev,
         libpq-dev,
