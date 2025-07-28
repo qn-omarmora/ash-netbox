@@ -91,6 +91,9 @@ class netbox::install (
         openssl-devel,
         redhat-rpm-config
       ]
+      $ldap_packages = [
+        openldap-devel
+      ]
     }
     /^(Debian|Ubuntu)$/:{
       $packages = [
@@ -106,6 +109,11 @@ class netbox::install (
         libssl-dev,
         zlib1g-dev
       ]
+      $ldap_packages = [
+        libldap2-dev,
+        libsasl2-dev,
+        libssl-dev
+      ]
     }
     default: {
       fail('Unknown OS family.')
@@ -116,8 +124,6 @@ class netbox::install (
   $software_directory_with_version = "${install_root}/netbox-${version}"
   $software_directory = "${install_root}/netbox"
   $venv_dir = "${software_directory}/venv"
-
-  $ldap_packages = [openldap-devel]
 
   ensure_packages($packages)
 
