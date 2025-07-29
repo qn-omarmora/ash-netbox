@@ -226,9 +226,9 @@
 #
 class netbox (
   String $secret_key,
-  String $version = '2.10.1',
-  String $download_url = 'https://github.com/netbox-community/netbox/archive/v2.10.1.tar.gz',
-  String $download_checksum = 'b827c520e4c82842e426a5f9ad2d914d1728a3671e304d5f25eb06392c24866c',
+  String $version = '4.3.4',
+  String $download_url = 'https://github.com/netbox-community/netbox/archive/v4.3.4.tar.gz',
+  String $download_checksum = 'c96c6708ecdba84f1b8952151dd5760ae4ddc51c7770ea9734218b21038a230c',
   Stdlib::Absolutepath $download_tmp_dir = '/var/tmp',
   String $user = 'netbox',
   String $group = 'netbox',
@@ -270,6 +270,8 @@ class netbox (
   String $email_username = '',
   String $email_password = '',
   String $email_from_email = '',
+  Boolean $email_ssl = false,
+  Boolean $email_tls = false,
   String $time_zone = 'UTC',
   String $date_format = 'N j, Y',
   String $short_date_format = 'Y-m-d',
@@ -352,6 +354,8 @@ class netbox (
     password   => $email_password,
     timeout    => $email_timeout,
     from_email => $email_from_email,
+    ssl        => $email_ssl,
+    tls        => $email_tls,
   }
 
   class { 'netbox::config':
