@@ -114,7 +114,7 @@ ADMINS = [
 ]
 
 # Permit the retrieval of API tokens after their creation.
-ALLOW_TOKEN_RETRIEVAL = <%=$allow_api_token_retrieval%>
+ALLOW_TOKEN_RETRIEVAL = <%=if $allow_api_token_retrieval {'True'} else {'False'} %>
 
 # Enable any desired validators for local account passwords below. For a list of included validators, please see the
 # Django documentation at https://docs.djangoproject.com/en/stable/topics/auth/passwords/#password-validation.
@@ -178,8 +178,8 @@ EMAIL = {
     'PORT': <%=$email_options['port']%>,
     'USERNAME': '<%=$email_options['username']%>',
     'PASSWORD': '<%=$email_options['password']%>',
-    'USE_SSL': <%=$email_options['ssl']%>,
-    'USE_TLS': <%=$email_options['tls']%>,
+    'USE_SSL': <%= if $email_options['ssl'] {'True'} else {'False'} %>,
+    'USE_TLS': <%=if $email_options['tls'] {'True'} else {'False'} %>,
     'TIMEOUT': <%=$email_options['timeout']%>,  # seconds
     'FROM_EMAIL': '<%=$email_options['from_email']%>',
 }
@@ -292,7 +292,7 @@ PREFER_IPV4 = False
 <% } -%>
 
 # Remote authentication support
-REMOTE_AUTH_ENABLED = <%=$remote_auth_enabled%>
+REMOTE_AUTH_ENABLED = <%=if $remote_auth_enabled {'True'} else {'False'} %>
 REMOTE_AUTH_BACKEND = '<%=$remote_auth_backend%>'
 REMOTE_AUTH_HEADER = '<%=$remote_auth_header%>'
 REMOTE_AUTH_USER_FIRST_NAME = '<%=$remote_auth_first_name%>'
