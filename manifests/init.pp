@@ -296,6 +296,13 @@ class netbox (
   String $remote_auth_first_name = '',
   String $remote_auth_last_name = '',
   String $remote_auth_user_email = '',
+  String $ldap_sever_uri = '',
+  String $ad_ou = '',
+  String $ad_bind_dn = '',
+  String $ad_require_dn = '',
+  String $ldap_bind_password = '',
+  Boolean $ldap_ignore_cert_errors = false,
+  Boolean $ldap_mirror_groups = true,
 
 ) {
 
@@ -410,6 +417,13 @@ class netbox (
     remote_auth_first_name    => $remote_auth_first_name,
     remote_auth_last_name     => $remote_auth_last_name,
     remote_auth_user_email    => $remote_auth_user_email,
+    ldap_sever_uri            => $ldap_sever_uri,
+    ad_ou                     => $ad_ou,
+    ad_bind_dn                => $ad_bind_dn,
+    ad_require_dn             => $ad_require_dn,
+    ldap_bind_password        => $ldap_bind_password,
+    ldap_ignore_cert_errors   => $ldap_ignore_cert_errors,
+    ldap_mirror_groups        => $ldap_mirror_groups,
   }
 
   class {'netbox::service':

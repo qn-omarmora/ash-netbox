@@ -1,8 +1,8 @@
 <% | 
   String $ldap_sever_uri,
   String $ad_ou,
-  String $ad_bind_cn,
-  String $ad_require_cn,
+  String $ad_bind_dn,
+  String $ad_require_dn,
   String $ldap_bind_password,
   Boolean $ldap_ignore_cert_errors,
   Boolean $ldap_mirror_groups,
@@ -19,13 +19,13 @@ AUTH_LDAP_CONNECTION_OPTIONS = {
 }
 
 # Set the DN and password for the NetBox service account.
-AUTH_LDAP_BIND_DN = "<%=$ad_bind_cn%>,OU=Service Accounts,<%=$ad_ou%>"
+AUTH_LDAP_BIND_DN = "<%=$ad_bind_dn%>,OU=Service Accounts,<%=$ad_ou%>"
 AUTH_LDAP_BIND_PASSWORD = "<%=$ldap_bind_password%>"
 
 # Include this setting if you want to ignore certificate errors. This might be needed to accept a self-signed cert.
 # Note that this is a NetBox-specific setting which sets:
 #     ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
-LDAP_IGNORE_CERT_ERRORS = <%=$ldap_ignore_cert_errors%>
+LDAP_IGNORE_CERT_ERRORS = <%=if $ldap_ignore_cert_errors {'True'} else {'False'}%>
 
 # This search matches users with the sAMAccountName equal to the provided username. This is required if the user's
 # username is not in their DN (Active Directory).
@@ -50,10 +50,10 @@ AUTH_LDAP_GROUP_SEARCH = LDAPSearch("<%=$ad_ou%>", ldap.SCOPE_SUBTREE,
 AUTH_LDAP_GROUP_TYPE = GroupOfNamesType()
 
 # Define a group required to login.
-AUTH_LDAP_REQUIRE_GROUP = "<%=$ad_require_cn%>,<%=$ad_ou%>"
+AUTH_LDAP_REQUIRE_GROUP = "<%=$ad_require_dn%>,<%=$ad_ou%>"
 
 # Mirror LDAP group assignments.
-AUTH_LDAP_MIRROR_GROUPS = <%=$ldap_mirror_groups%>
+AUTH_LDAP_MIRROR_GROUPS = <%=if $ldap_mirror_groups {'True'} else {'False'}%>
 
 # Define special user types using groups. Exercise great caution when assigning superuser status.
 AUTH_LDAP_USER_FLAGS_BY_GROUP = {

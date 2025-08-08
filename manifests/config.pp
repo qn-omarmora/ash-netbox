@@ -209,6 +209,13 @@ class netbox::config (
   String $remote_auth_first_name,
   String $remote_auth_last_name,
   String $remote_auth_user_email,
+  String $ldap_sever_uri,
+  String $ad_ou,
+  String $ad_bind_dn,
+  String $ad_require_dn,
+  String $ldap_bind_password,
+  Boolean $ldap_ignore_cert_errors,
+  Boolean $ldap_mirror_groups,
 ) {
   $should_create_superuser = false;
   $software_directory = "${install_root}/netbox"
@@ -279,6 +286,28 @@ class netbox::config (
     mode         => '0644',
     validate_cmd => "${venv_dir}/bin/python -m py_compile %",
     notify       => Exec['collect static files'],
+  }
+
+  if $remote_auth_enabled {
+
+    $ldap_config_file = "${software_directory}/netbox/netbox/ldap_config.py"
+
+    file { $ldap_config_file:
+      content      => epp('netbox/ldap_config.py.epp', {
+        'ldap_sever_uri'          => $ldap_sever_uri,
+        'ad_ou'                   => $ad_ou,
+        'ad_bind_dn'              => $ad_bind_dn,
+        'ad_require_dn'           => $ad_require_dn,
+        'ldap_bind_password'      => $ldap_bind_password,
+        'ldap_ignore_cert_errors' => $ldap_ignore_cert_errors,
+        'ldap_mirror_groups'      => $ldap_mirror_groups,
+      }),
+      owner        => $user,
+      group        => $group,
+      mode         => '0644',
+      validate_cmd => "${venv_dir}/bin/python -m py_compile %",
+      notify       => Exec['collect static files'],
+    }
   }
 
   Exec {
