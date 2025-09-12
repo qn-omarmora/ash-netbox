@@ -236,6 +236,7 @@ class netbox (
   Stdlib::Absolutepath $install_root = '/opt',
   Boolean $handle_database = true,
   Boolean $handle_redis = true,
+  Boolean $handle_python = true,
   String $redis_host = 'localhost',
   Integer $redis_port = 6379,
   String $redis_password = '',
@@ -305,10 +306,20 @@ class netbox (
   String $ldap_bind_password = '',
   Boolean $ldap_ignore_cert_errors = false,
   Boolean $ldap_mirror_groups = true,
-
+  String $python_index_url = 'https://pypi.org/simple',
+  String $python_cert_path = '/etc/ssl/certs/ca-certificates.crt',
 ) {
 
   Class['netbox::install'] -> Class['netbox::config'] ~> Class['netbox::service']
+
+  if $handle_python {
+    class { 'python':
+      version       => 'system',
+      pip           => 'present',
+      dev           => 'present',
+      venv          => 'present',
+    }
+  }
 
   if $handle_database {
     class { 'netbox::database':
@@ -345,6 +356,9 @@ class netbox (
     include_ldap                         => $include_ldap,
     install_dependencies_from_filesystem => $install_dependencies_from_filesystem,
     python_dependency_path               => $python_dependency_path,
+    python_index_url                     => $python_index_url,
+    python_cert_path                     => $python_cert_path,
+
   }
 
   $redis_options = {

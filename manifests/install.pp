@@ -68,6 +68,8 @@ class netbox::install (
   String $download_url,
   String $download_checksum,
   String $download_checksum_type,
+  String $python_index_url,
+  String $python_cert_path,
   Stdlib::Absolutepath $download_tmp_dir,
   String $user,
   String $group,
@@ -83,8 +85,6 @@ class netbox::install (
     'Redhat': {
       $packages = [
         gcc,
-        python36,
-        python36-devel,
         libxml2-devel,
         libxslt-devel,
         libffi-devel,
@@ -97,10 +97,6 @@ class netbox::install (
     }
     /^(Debian|Ubuntu)$/:{
       $packages = [
-        python3,
-        python3-pip,
-        python3-venv,
-        python3-dev,
         build-essential,
         libxml2-dev,
         libxslt1-dev,
@@ -139,14 +135,6 @@ class netbox::install (
 
   group { $group:
     system => true,
-  }
-
-  if $install_dependencies_from_filesystem {
-    $install_requirements_command       = "${venv_dir}/bin/pip3 install -r requirements.txt --no-index --find-links ${python_dependency_path}"
-    $install_local_requirements_command = "${venv_dir}/bin/pip3 install -r local_requirements.txt --no-index --find-links ${python_dependency_path}"
-  } else {
-    $install_requirements_command       = "${venv_dir}/bin/pip3 install -r requirements.txt"
-    $install_local_requirements_command = "${venv_dir}/bin/pip3 install -r local_requirements.txt"
   }
 
   archive { $local_tarball:
@@ -205,31 +193,50 @@ class netbox::install (
     }
   }
 
-  exec { "python_venv_${venv_dir}":
-    command => "/usr/bin/python3 -m venv ${venv_dir}",
-    user    => $user,
-    creates => "${venv_dir}/bin/activate",
-    cwd     => '/tmp',
-    unless  => "/usr/bin/grep '^[\\t ]*VIRTUAL_ENV=[\\\\'\\\"]*${venv_dir}[\\\"\\\\'][\\t ]*$' ${venv_dir}/bin/activate",
+  python::dotfile { '/etc/pip.conf':
+    ensure => present,
+    owner  => $user,
+    group  => $group,
+    config => {
+      'global' => {
+        'index-url' => $python_index_url
+        'cert'      => $python_cert_path
+      }
+    }
   }
-  ~>exec { 'install python requirements':
-    cwd         => $software_directory,
-    path        => [ "${venv_dir}/bin", '/usr/bin', '/usr/sbin' ],
-    environment => ["VIRTUAL_ENV=${venv_dir}"],
-    provider    => shell,
-    user        => $user,
-    command     => $install_requirements_command,
-    onlyif      => "/usr/bin/grep '^[\\t ]*VIRTUAL_ENV=[\\\\'\\\"]*${venv_dir}[\\\"\\\\'][\\t ]*$' ${venv_dir}/bin/activate",
-    refreshonly => true,
+
+  python::pyvenv { 'netbox_venv':
+    ensure      => present,
+    owner       => $user,
+    group       => $group,
+    systempkgs  => false,
+    venv_dir    => "${install_root}/netbox",
   }
-  ~>exec { 'install local python requirements':
-    cwd         => $software_directory,
-    path        => [ "${venv_dir}/bin", '/usr/bin', '/usr/sbin' ],
-    environment => ["VIRTUAL_ENV=${venv_dir}"],
-    provider    => shell,
-    user        => $user,
-    command     => $install_local_requirements_command,
-    onlyif      => "/usr/bin/grep '^[\\t ]*VIRTUAL_ENV=[\\\\'\\\"]*${venv_dir}[\\\"\\\\'][\\t ]*$' ${venv_dir}/bin/activate",
-    refreshonly => true,
+
+if $install_dependencies_from_filesystem {
+    python::requirements { "${install_root}/netbox/requirements.txt" :
+      virtualenv      => 'netbox_venv',
+      owner           => $user,
+      group           => $group,
+      extra_pip_args  => ['--no-index','--find-links', $python_dependency_path],
+    }
+
+    python::requirements { "${install_root}/netbox/local_requirements.txt" :
+      virtualenv      => 'netbox_venv',
+      owner           => $user,
+      group           => $group,
+      extra_pip_args  => ['--no-index','--find-links', $python_dependency_path],
+    }
+  } else {
+    python::requirements { "${install_root}/netbox/requirements.txt" :
+      virtualenv => 'netbox_venv',
+      owner      => $user,
+      group      => $group,
+    }
+
+    python::requirements { "${install_root}/netbox/local_requirements.txt" :
+      virtualenv => 'netbox_venv',
+      owner      => $user,
+      group      => $group,
+    }
   }
-}
