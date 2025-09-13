@@ -68,8 +68,6 @@ class netbox::install (
   String $download_url,
   String $download_checksum,
   String $download_checksum_type,
-  String $python_index_url,
-  String $python_cert_path,
   Stdlib::Absolutepath $download_tmp_dir,
   String $user,
   String $group,
@@ -193,18 +191,6 @@ class netbox::install (
     }
   }
 
-  python::dotfile { '/etc/pip.conf':
-    ensure => present,
-    owner  => $user,
-    group  => $group,
-    config => {
-      'global' => {
-        'index-url' => $python_index_url
-        'cert'      => $python_cert_path
-      }
-    }
-  }
-
   python::pyvenv { 'netbox_venv':
     ensure      => present,
     owner       => $user,
@@ -240,3 +226,4 @@ if $install_dependencies_from_filesystem {
       group      => $group,
     }
   }
+}
