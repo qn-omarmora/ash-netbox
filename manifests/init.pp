@@ -312,7 +312,7 @@ class netbox (
 
   if $handle_python {
     class { 'python':
-      version       => 'system',
+      version       => '3',
       pip           => 'present',
       dev           => 'present',
       venv          => 'present',
