@@ -143,7 +143,6 @@ class netbox::install (
       extract_path  => $install_root,
       creates       => $software_directory_with_version,
       cleanup       => true,
-      notify        => Exec['install python requirements'],
     }
 
     exec { 'netbox permission':
@@ -168,7 +167,6 @@ class netbox::install (
     file_line { 'napalm':
       path    => "${software_directory}/local_requirements.txt",
       line    => 'napalm',
-      notify  => Exec['install local python requirements'],
       require => File['local_requirements']
     }
   }
@@ -177,7 +175,6 @@ class netbox::install (
     file_line { 'django_storages':
       path    => "${software_directory}/local_requirements.txt",
       line    => 'django-storages',
-      notify  => Exec['install local python requirements'],
       require => File['local_requirements']
     }
   }
@@ -186,7 +183,6 @@ class netbox::install (
     file_line { 'ldap':
       path    => "${software_directory}/local_requirements.txt",
       line    => 'django-auth-ldap',
-      notify  => Exec['install local python requirements'],
       require => File['local_requirements']
     }
   }
