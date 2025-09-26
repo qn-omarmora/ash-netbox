@@ -196,7 +196,7 @@ class netbox::install (
     owner       => $user,
     group       => $group,
     systempkgs  => false,
-    venv_dir    => "${install_root}/netbox",
+    venv_dir    => $venv_dir,
   }
 
 if $install_dependencies_from_filesystem {
