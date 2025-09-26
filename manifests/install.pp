@@ -201,27 +201,27 @@ class netbox::install (
 
 if $install_dependencies_from_filesystem {
     python::requirements { "${install_root}/netbox/requirements.txt" :
-      virtualenv      => 'netbox_venv',
+      virtualenv      => $venv_dir,
       owner           => $user,
       group           => $group,
       extra_pip_args  => ['--no-index','--find-links', $python_dependency_path],
     }
 
     python::requirements { "${install_root}/netbox/local_requirements.txt" :
-      virtualenv      => 'netbox_venv',
+      virtualenv      => $venv_dir,
       owner           => $user,
       group           => $group,
       extra_pip_args  => ['--no-index','--find-links', $python_dependency_path],
     }
   } else {
     python::requirements { "${install_root}/netbox/requirements.txt" :
-      virtualenv => 'netbox_venv',
+      virtualenv => $venv_dir,
       owner      => $user,
       group      => $group,
     }
 
     python::requirements { "${install_root}/netbox/local_requirements.txt" :
-      virtualenv => 'netbox_venv',
+      virtualenv => $venv_dir,
       owner      => $user,
       group      => $group,
     }
